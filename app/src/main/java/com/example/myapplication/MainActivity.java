@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if((boolean)ree[0] == true && btSocket == null){//!=
                 Object[] hydra = stringContainsItemFromHybrid((String)ree[1] , currentLabels);
                 if((boolean)hydra[0] == true){
-                    int left = (Integer) hydra[2];
+                    int left = (Integer) hydra[2];//Placement of the phone Min=50 , Max=950 (In x coordinates)
                     new Thread(()->{directRobot(left,(String) hydra[1]);}).start();
                 }
 
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             else{
             Object[] re = stringContainsItemFromList((result.get(0)),directions);
                 if((boolean)re[0] == true && btSocket != null){
-                  sendString((String) re[1]);
+                  sendChar(((String) re[1]).toUpperCase().charAt(0));//Sends The first Letter capitallized (Lazy rather than mapping)
             }
             }
         }
@@ -191,20 +191,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public boolean directRobot(int left,String label){
         try {
             while(true){
-          /*  InputStream inputStream = btSocket.getInputStream();
-            //  inputStream.skip(inputStream.available());//cleaning buffer
-            if(inputStream.available() > 0){
+ /**             InputStream inputStream = btSocket.getInputStream();
+              if(inputStream.available() > 0){
                 String word="";
                 for(int i=0;i<3;i++){
                     byte b = (byte) inputStream.read();
                     word += b;
                 }
-                if(word.equals("ack")) return true;
-            }*/
-
-                if(left > 650){Log.d(TAG,"Go Right");runOnUiThread(new Runnable() {public void run() {txvResult2.setText("Right");}});}/*sendString("right");*/
-                else if(left < 450){Log.d(TAG,"Go Left");runOnUiThread(new Runnable() {public void run() {txvResult2.setText("Left");}});} /*sendString("left");*/
-                else{Log.d(TAG,"Go Forward");runOnUiThread(new Runnable() {public void run() {txvResult2.setText("Forward");}});}
+                if(!word.equals("ack")) return false;
+              }*/
+                // The goal here is to center the phone relative to the detected object
+                if(left > 650){Log.d(TAG,"Go Right"); // if x coordinate is greater
+                runOnUiThread(new Runnable() {public void run() {// than 650 then go right to decrease it
+                    txvResult2.setText("Right");sendChar('R');}});
+                }
+                else if(left < 450){Log.d(TAG,"Go Left");// if x coordinate is less
+                runOnUiThread(new Runnable() {public void run() {// than 450 then go left to increase it
+                    txvResult2.setText("Left");sendChar('L');
+                }});}
+                else{Log.d(TAG,"Go Forward");//if non of the above go forward
+                runOnUiThread(new Runnable() {public void run()// (meaning the object is in the center)
+                              {txvResult2.setText("Forward");sendChar('F');}}
+                );}
                 Thread.sleep(100);
                 left = findNeededLeft(currentLabels,label);
             }
@@ -220,11 +228,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
               }
               return 0;//when not found in new frame go left
     }
-    public boolean sendString(String s){
+    public boolean sendChar(char s){
         OutputStream outputStream = null;
         try {
-            outputStream = btSocket.getOutputStream();//sending vocal instructions
-            outputStream.write(s.getBytes());
+            outputStream = btSocket.getOutputStream();//sending instructions
+            outputStream.write(s);
             return true;
         } catch (IOException e) {
             return false;
@@ -367,7 +375,6 @@ public void onCameraViewStarted(int width, int height)
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
     {
         if(dst != null){dst.release();dst=new Mat();}
-        //Log.d(TAG,"onCameraFrame");
         mRGBA = inputFrame.rgba();
         Core.transpose(mRGBA, mRGBAT);
         Core.flip(mRGBAT, mRGBAT, 1);
