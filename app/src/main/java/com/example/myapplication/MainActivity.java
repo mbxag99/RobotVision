@@ -188,18 +188,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
     
     //Keep sending updated coordinates as long as the robot has not send acknowledgment of arrival to goal
-    public boolean directRobot(int left,String label){
+    public void directRobot(int left,String label){
         try {
             while(true){
- /**             InputStream inputStream = btSocket.getInputStream();
+              InputStream inputStream = btSocket.getInputStream();
               if(inputStream.available() > 0){
-                String word="";
-                for(int i=0;i<3;i++){
-                    byte b = (byte) inputStream.read();
-                    word += b;
+                char C=(char)inputStream.read();
+                if(C == 'S') {
+                    sendChar('S');
+                    return;
                 }
-                if(!word.equals("ack")) return false;
-              }*/
+              }
                 // The goal here is to center the phone relative to the detected object
                 if(left > 650){Log.d(TAG,"Go Right"); // if x coordinate is greater
                 runOnUiThread(new Runnable() {public void run() {// than 650 then go right to decrease it
@@ -220,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         /*IOException|InterruptedException e*/
         catch (Exception e){e.printStackTrace();}
         //Keep sending updated coordinates as long as the robot has not send acknowledgment of arrival to goal
-        return false;
+        return;
     }
     public int findNeededLeft(List<Object[]> l,String needed){
               for(Object[] ob : l){
